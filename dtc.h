@@ -164,6 +164,12 @@ struct node {
 	struct label *labels;
 };
 
+struct overlay {
+	char *target;
+	struct node *dt;
+	struct overlay *next;
+};
+
 #define for_each_label_withdel(l0, l) \
 	for ((l) = (l0); (l); (l) = (l)->next)
 
@@ -208,6 +214,10 @@ void delete_node(struct node *node);
 void append_to_property(struct node *node,
 			char *name, const void *data, int len);
 
+struct overlay *build_overlay(char *target, struct node *dt);
+struct overlay *chain_overlay(struct overlay *first, struct overlay *list);
+void apply_overlay(struct node *base, struct overlay *overlay);
+
 const char *get_unitname(struct node *node);
 struct property *get_property(struct node *node, const char *propname);
 cell_t propval_cell(struct property *prop);
@@ -245,7 +255,9 @@ struct dt_info {
 	unsigned int dtsflags;
 	struct reserve_info *reservelist;
 	uint32_t boot_cpuid_phys;
-	struct node *dt;		/* the device tree */
+
+	struct node *dt;
+	struct overlay *overlays;
 };
 
 /* DTS version flags definitions */
@@ -254,7 +266,9 @@ struct dt_info {
 
 struct dt_info *build_dt_info(unsigned int dtsflags,
 			      struct reserve_info *reservelist,
-			      struct node *tree, uint32_t boot_cpuid_phys);
+			      struct node *basetree,
+			      struct overlay *overlays,
+			      uint32_t boot_cpuid_phys);
 void sort_tree(struct dt_info *dti);
 void generate_label_tree(struct dt_info *dti, char *name, bool allocph);
 void generate_fixups_tree(struct dt_info *dti, char *name);
