@@ -163,18 +163,26 @@ uint32_t fdt_next_tag(const void *fdt, int offset, int *nextoffset);
 
 static inline uint32_t fdt32_ld(const fdt32_t *p)
 {
-	fdt32_t v;
+	if ((uintptr_t)p % sizeof(fdt32_t)) {
+		fdt32_t v;
 
-	memcpy(&v, p, sizeof(v));
-	return fdt32_to_cpu(v);
+		memcpy(&v, p, sizeof(v));
+		return fdt32_to_cpu(v);
+	} else {
+		return fdt32_to_cpu(*p);
+	}
 }
 
 static inline uint64_t fdt64_ld(const fdt64_t *p)
 {
-	fdt64_t v;
+	if ((uintptr_t)p % sizeof(fdt64_t)) {
+		fdt64_t v;
 
-	memcpy(&v, p, sizeof(v));
-	return fdt64_to_cpu(v);
+		memcpy(&v, p, sizeof(v));
+		return fdt64_to_cpu(v);
+	} else {
+		return fdt64_to_cpu(*p);
+	}
 }
 
 /**********************************************************************/
